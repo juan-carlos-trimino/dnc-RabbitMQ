@@ -1,0 +1,36 @@
+# Ignore everything.
+**
+
+# But include these files...
+!.dockerignore
+!.gitignore
+!Dockerfile-Publisher-prod
+!Dockerfile-Subscriber-prod
+# ... and these files under the 'gateway' directory...
+!rmq-messages/
+rmq-messages/*
+!rmq-messages/.gitkeep
+!rmq-messages/messages/
+rmq-messages/messages/*
+!rmq-messages/messages/Message1.cs
+!rmq-messages/messages/Message2.cs
+!rmq-messages/messages/Messages.csproj
+!rmq-messages/messages/Messages.sln
+# ... and these directories...
+!rmq-publisher/
+rmq-publisher/*
+!rmq-publisher/.gitkeep
+!rmq-publisher/publisher/
+rmq-publisher/publisher/*
+!rmq-publisher/publisher/Program.cs
+!rmq-publisher/publisher/Publisher.csproj
+!rmq-publisher/publisher/Publisher.sln
+# ... and these directories...
+!rmq-subscriber/
+rmq-subscriber/*
+!rmq-subscriber/.gitkeep
+!rmq-subscriber/subscriber/
+rmq-subscriber/subscriber/*
+!rmq-subscriber/subscriber/Program.cs
+!rmq-subscriber/subscriber/Subscriber.csproj
+!rmq-subscriber/subscriber/Subscriber.sln

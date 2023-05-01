@@ -1,0 +1,59 @@
+# Alpine images provide the Almquist shell (ash) from BusyBox.
+# $ docker images
+# $ docker rmi <image-id>
+#
+# Official images for the .NET SDK: https://hub.docker.com/_/microsoft-dotnet-sdk/
+# If using a Windows machine, download the Linux image from the Windows Subsystem for Linux (WSL).
+# Use the command below to download an image:
+#  PS> docker pull mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17
+#
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine-amd64 AS Builder
+
+WORKDIR /messages
+
+COPY ./rmq-messages/messages/ ./
+
+RUN dotnet restore "./Messages.csproj" && \
+    dotnet build "./Messages.csproj" -c Release -o /app --no-restore && \
+    # For more information about the .NET RID Catalog, see
+    # https://learn.microsoft.com/en-us/dotnet/core/rid-catalog
+    dotnet publish "./Messages.csproj" -c Release -o /app --no-restore --runtime rhel-x64 && \
+    rm /app/*.pdb
+
+WORKDIR /subscriber
+
+COPY ./rmq-subscriber/subscriber/ ./
+
+RUN cp /app/Messages.* ./ && \
+    # For more information about the 'dotnet restore' command, see
+    # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-restore
+    dotnet restore "./Subscriber.csproj" && \
+    # For more information about the 'dotnet build' command, see
+    # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-build
+    dotnet build "./Subscriber.csproj" -c Release -o /app --no-restore && \
+    # For more information about .NET application publishing, see
+    # https://learn.microsoft.com/en-us/dotnet/core/deploying/ and
+    # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
+    dotnet publish "./Subscriber.csproj" -c Release -o /app --no-restore --runtime rhel-x64 && \
+    rm /app/*.pdb
+
+# Official images for the .NET runtime: https://hub.docker.com/_/microsoft-dotnet-runtime/
+# If using OpenShift, use the .NET Runtime image from RedHat at
+# https://catalog.redhat.com/software/containers/rhel8/dotnet-70-runtime/633c2b337a32f2ea2eb51dec
+# To pull the image from RedHat, see
+# https://access.redhat.com/RegistryAuthentication#red-hat-registries-1
+#
+# Final image.
+FROM registry.redhat.io/rhel8/dotnet-70-runtime:7.0-12
+
+WORKDIR /app
+
+COPY --from=Builder /app ./
+
+USER 1001:1001
+
+EXPOSE 8080
+
+# CMD ["sh", "-c", "tail -f /dev/null"]
+# kubectl exec -it <pod-id> -n <namespace> -- sh
+ENTRYPOINT ["./Subscriber"]
