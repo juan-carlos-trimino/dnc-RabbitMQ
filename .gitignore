@@ -6,6 +6,7 @@
 !.gitignore
 !Dockerfile-Publisher-prod
 !Dockerfile-Subscriber-prod
+!README.md
 # ... and these files under the 'gateway' directory...
 !rmq-messages/
 rmq-messages/*
